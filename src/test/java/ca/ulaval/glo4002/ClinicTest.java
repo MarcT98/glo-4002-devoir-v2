@@ -1,11 +1,14 @@
 package ca.ulaval.glo4002;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.*;
 
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -170,4 +173,86 @@ public class ClinicTest {
 
         assertEquals(patient2, clinic.doctorQueue.element());
     }
+
+    @ParameterizedTest
+    @ValueSource(ints = {5, 15, Integer.MIN_VALUE, Integer.MAX_VALUE})
+    public void triagePatient_adds_patient_to_front_of_doctor_queue_when_patient_has_gravity_greater_than_5(int gravity) {
+        Clinic clinic = new Clinic();
+        Patient patient1 = new Patient(
+                getRandomName(),
+                1,
+                VisibleSymptom.FLU
+        );
+        Patient patient2 = new Patient(
+                getRandomName(),
+                gravity,
+                VisibleSymptom.FLU
+        );
+
+        clinic.triagePatient(patient1);
+        clinic.triagePatient(patient2);
+
+        assertEquals(patient2, clinic.doctorQueue.element());
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(GravityPriorityValuesProvider.class)
+    public void triagePatient_adds_patient_to_front_of_doctor_queue_when_new_patient_has_gravity_greater_than_5_whatever_other_patients(
+            int gravityPatient1,
+            int gravityPatient2
+    ) {
+        Clinic clinic = new Clinic();
+        Patient patient1 = new Patient(
+                getRandomName(),
+                gravityPatient1,
+                VisibleSymptom.FLU
+        );
+        Patient patient2 = new Patient(
+                getRandomName(),
+                gravityPatient2,
+                VisibleSymptom.FLU
+        );
+
+        clinic.triagePatient(patient1);
+        clinic.triagePatient(patient2);
+
+        assertEquals(patient2, clinic.doctorQueue.element());
+    }
+
+    static class GravityPriorityValuesProvider implements ArgumentsProvider {
+
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+            return Stream.of(
+                    Arguments.of(1, 6),
+                    Arguments.of(2, 6),
+                    Arguments.of(3, 6),
+                    Arguments.of(4, 6),
+                    Arguments.of(5, 6),
+                    Arguments.of(6, 6),
+                    Arguments.of(7, 6)
+            );
+        }
+    }
+
+//    @Test
+//    public void triagePatient_adds_patient_to_end_of_radiology_queue_when_patient_has_gravity_7_and_Broken_Bone(int gravity) {
+//        Clinic clinic = new Clinic();
+//        Patient patient1 = new Patient(
+//                getRandomName(),
+//                1,
+//                VisibleSymptom.SPRAIN
+//        );
+//        Patient patient2 = new Patient(
+//                getRandomName(),
+//                7,
+//                VisibleSymptom.BROKEN_BONE
+//        );
+//
+//        clinic.triagePatient(patient1);
+//        clinic.triagePatient(patient2);
+//
+//        assertEquals(patient2, clinic.doctorQueue.stream().toList().get(1));
+//    }
+
 }

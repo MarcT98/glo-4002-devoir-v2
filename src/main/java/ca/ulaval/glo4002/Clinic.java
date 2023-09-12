@@ -7,28 +7,36 @@ public class Clinic {
 
     public Queue<Patient> doctorQueue = new LinkedList<>();
     public Queue<Patient> radiologyQueue = new LinkedList<>();
+    public TriageType triageTypeDoctor;
 
     public Clinic() {
     }
 
-    public void triagePatient(Patient patient) {
-        if (patient.visibleSymptom == VisibleSymptom.MIGRAINE) {
-            addToFrontOfDoctorQueue(patient);
-        } else {
-            doctorQueue.add(patient);
-        }
-        if (patient.visibleSymptom == VisibleSymptom.SPRAIN) {
-            addToFrontOfDoctorQueue(patient);
-            addToFrontOfRadiologyQueue(patient);
-        }
-
+    public Clinic(TriageType triageTypeDoctor) {
+        this.triageTypeDoctor = triageTypeDoctor;
     }
 
-    private void addToFrontOfRadiologyQueue(Patient patient) {
-        Queue<Patient> updatedRadiology = new LinkedList<>();
-        updatedRadiology.add(patient);
-        updatedRadiology.addAll(radiologyQueue);
-        radiologyQueue = updatedRadiology;
+    public void triagePatient(Patient patient) {
+        if (doesPatientHavePriority(patient)) {
+            addToFrontOfDoctorQueue(patient);
+            return;
+        }
+        fifoTriageAlgorithm(patient);
+    }
+
+    private void fifoTriageAlgorithm(Patient patient) {
+        switch (patient.visibleSymptom) {
+            case MIGRAINE -> addToFrontOfDoctorQueue(patient);
+            case SPRAIN -> {
+                addToFrontOfDoctorQueue(patient);
+                addToFrontOfRadiologyQueue(patient);
+            }
+            default -> doctorQueue.add(patient);
+        }
+    }
+
+    private static boolean doesPatientHavePriority(Patient patient) {
+        return patient.gravity > 5;
     }
 
     private void addToFrontOfDoctorQueue(Patient patient) {
@@ -36,5 +44,12 @@ public class Clinic {
         updatedDoctor.add(patient);
         updatedDoctor.addAll(doctorQueue);
         doctorQueue = updatedDoctor;
+    }
+
+    private void addToFrontOfRadiologyQueue(Patient patient) {
+        Queue<Patient> updatedRadiology = new LinkedList<>();
+        updatedRadiology.add(patient);
+        updatedRadiology.addAll(radiologyQueue);
+        radiologyQueue = updatedRadiology;
     }
 }
