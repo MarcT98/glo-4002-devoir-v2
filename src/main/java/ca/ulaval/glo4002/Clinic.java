@@ -2,18 +2,25 @@ package ca.ulaval.glo4002;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import ca.ulaval.glo4002.Patient;
 
 public class Clinic {
 
-    public Queue<Patient> doctorQueue = new LinkedList<>();
+    private Queue<Patient> doctorQueue = new LinkedList<>();
+
     public Queue<Patient> radiologyQueue = new LinkedList<>();
+
     public TriageType triageTypeDoctor;
 
     public Clinic() {
     }
 
     public Clinic(TriageType triageTypeDoctor) {
-        this.triageTypeDoctor = triageTypeDoctor;
+            this.triageTypeDoctor = triageTypeDoctor;
+    }
+
+    public Patient getNextPatient() {
+        return this.doctorQueue.peek();
     }
 
     public void triagePatient(Patient patient) {
@@ -25,7 +32,7 @@ public class Clinic {
     }
 
     private void fifoTriageAlgorithm(Patient patient) {
-        switch (patient.visibleSymptom) {
+        switch (patient.getVisibleSymptom()) {
             case MIGRAINE -> addToFrontOfDoctorQueue(patient);
             case SPRAIN -> {
                 addToFrontOfDoctorQueue(patient);
@@ -36,7 +43,7 @@ public class Clinic {
     }
 
     private static boolean doesPatientHavePriority(Patient patient) {
-        return patient.gravity > 5;
+        return patient.getGravity() > 5;
     }
 
     private void addToFrontOfDoctorQueue(Patient patient) {
